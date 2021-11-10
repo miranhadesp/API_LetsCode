@@ -35,6 +35,8 @@ namespace Hotel_Passagem.Services
         {
             dbContext.Entry(hotel).State = EntityState.Modified;
 
+            hotel.Id = id;
+
             await dbContext.SaveChangesAsync();
 
             var p = await GetHotel(id);
@@ -67,8 +69,6 @@ namespace Hotel_Passagem.Services
             }
             return "Falha ao remover";
         }
-
-
     }
 }
 

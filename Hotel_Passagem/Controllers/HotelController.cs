@@ -35,15 +35,19 @@ namespace Hotel_Passagem.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Hotel>> GetHotel(int id)
         {
-            return await service.GetHotel(id);
+            var hotel = await ValidarId(id);
+
+            return hotel.Value == null ? hotel.Result : Ok(hotel.Value);
         }
 
         // PUT: api/Hotel/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<Hotel> PutHotel(int id, Hotel hotel)
+        public async Task<ActionResult<Hotel>> PutHotel(int id, Hotel hotel) 
         {
-            return await service.PutHotel(id, hotel);
+            var verify = await ValidarId(id);
+
+            return verify.Value == null ? verify.Result : Ok(await service.PutHotel(id, hotel));
         }
 
         // POST: api/Hotel
@@ -51,6 +55,11 @@ namespace Hotel_Passagem.Controllers
         [HttpPost]
         public async Task<ActionResult<Hotel>> PostHotel(Hotel hotel)
         {
+            if(hotel.Nome == null)
+            {
+                return BadRequest("Nome nulo");
+            }
+
             return await service.PostHotel(hotel);
         }
 
@@ -58,7 +67,28 @@ namespace Hotel_Passagem.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<string>> DeleteHotel(int id)
         {
-            return await service.DeleteHotel(id);
+            var verify = await ValidarId(id);
+
+            return verify.Value == null ? verify.Result : Ok(await service.DeleteHotel(id));
+        }
+
+        private async Task<ActionResult<Hotel>> ValidarId(int id)
+        {
+            try
+            {
+                var verify = await service.GetHotel(id);
+
+                if (verify == null)
+                {
+                    return BadRequest("id não encontrado");
+                }
+
+                return verify;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
     }
 }
