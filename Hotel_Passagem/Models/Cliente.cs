@@ -5,20 +5,19 @@ using System.Collections.Generic;
 
 namespace Hotel_Passagem.Models
 {
-    public partial class Quarto
+    public partial class Cliente
     {
-        public Quarto()
+        public Cliente()
         {
             ReservaQuartos = new HashSet<ReservaQuarto>();
+            VendaPassagems = new HashSet<VendaPassagem>();
         }
 
         public int Id { get; set; }
-        public int? IdHotel { get; set; }
-        public string Tipo { get; set; }
-        public int? Valor { get; set; }
-        public string InfoQuarto { get; set; }
+        public string Nome { get; set; }
+        public string Cpf { get; set; }
 
-        public virtual Hotel IdHotelNavigation { get; set; }
         public virtual ICollection<ReservaQuarto> ReservaQuartos { get; set; }
+        public virtual ICollection<VendaPassagem> VendaPassagems { get; set; }
     }
 }

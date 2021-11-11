@@ -10,6 +10,7 @@ using Hotel_Passagem.Services;
 
 namespace Hotel_Passagem.Controllers
 {
+   
     [Route("api/[controller]")]
     [ApiController]
     public class HotelController : ControllerBase

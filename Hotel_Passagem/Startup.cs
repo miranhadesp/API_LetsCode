@@ -17,6 +17,7 @@ using Hotel_Passagem.Models;
 
 namespace Hotel_Passagem
 {
+    
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -37,7 +38,7 @@ namespace Hotel_Passagem
 
             services.AddScoped<AppDbContext>();
             services.AddScoped<HotelService>();
-
+            
             services.AddMvc()
             .AddNewtonsoftJson(
                  options =>

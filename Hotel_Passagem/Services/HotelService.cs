@@ -9,6 +9,7 @@ using Hotel_Passagem.Models;
 
 namespace Hotel_Passagem.Services
 {
+    
     public class HotelService
     {
         private readonly AppDbContext dbContext;
