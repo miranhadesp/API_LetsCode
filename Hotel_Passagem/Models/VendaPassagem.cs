@@ -9,11 +9,6 @@ namespace Hotel_Passagem.Models
     {
         public int Id { get; set; }
         public int? IdPassagem { get; set; }
-        public string Nome { get; set; }
-        public decimal? Valor { get; set; }
         public int? IdCliente { get; set; }
-
-        public virtual Cliente IdClienteNavigation { get; set; }
-        public virtual Passagem IdPassagemNavigation { get; set; }
     }
 }

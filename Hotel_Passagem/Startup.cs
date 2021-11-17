@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Hotel_Passagem.Services;
 using Hotel_Passagem.Models;
 
 namespace Hotel_Passagem
@@ -36,9 +35,10 @@ namespace Hotel_Passagem
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hotel_Passagem", Version = "v1" });
             });
 
+            //services.AddScoped<testContext>();
+
             services.AddScoped<AppDbContext>();
-            services.AddScoped<HotelService>();
-            
+
             services.AddMvc()
             .AddNewtonsoftJson(
                  options =>

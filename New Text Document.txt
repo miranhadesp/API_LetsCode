@@ -1,0 +1,1 @@
+"Data Source=curraley.database.windows.net;Initial Catalog=lets1;User ID=alunosinqia;Password=Aluno@001;Persist Security Info=True"

@@ -1,75 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Hotel_Passagem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Hotel_Passagem.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Hotel_Passagem.Services
 {
-    
     public class HotelService
     {
-        private readonly AppDbContext dbContext;
+        private readonly AppDbContext _context;
 
-        public HotelService(AppDbContext dbContext)
+        public HotelService(AppDbContext context)
         {
-            this.dbContext = dbContext;
+            _context = context;
         }
 
-        //Get all pizzas
-        public async Task<ActionResult<IEnumerable<Hotel>>> GetHoteis()
+        public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
         {
-            return await dbContext.Hoteis.Include(p => p.Quartos).ToListAsync();
+            return await _context.Hotels.ToListAsync();
         }
 
-        public async Task<Hotel> GetHotel(int id)
+       
+        public async Task<ActionResult<Hotel>> GetHotel(int id)
         {
-            var hotel = await dbContext.Hoteis.Include(p => p.Quartos).Where(j => j.Id == id).FirstOrDefaultAsync();
+            var hotel = await _context.Hotels.FindAsync(id);
+            return hotel;
+        }
+       
+        public async Task<ActionResult<Hotel>> PutHotel(int id, Hotel hotel)
+        {
+            _context.Entry(hotel).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+            var aux = await _context.Hotels.FirstOrDefaultAsync(i => i.Id == id);
+
+            return aux;
+        }
+   
+        public async Task<ActionResult<Hotel>> PostHotel(Hotel hotel)
+        {
+            _context.Hotels.Add(hotel);
+            await _context.SaveChangesAsync();
 
             return hotel;
         }
-
-        public async Task<Hotel> PutHotel(int id, Hotel hotel)
-        {
-            dbContext.Entry(hotel).State = EntityState.Modified;
-
-            hotel.Id = id;
-
-            await dbContext.SaveChangesAsync();
-
-            var p = await GetHotel(id);
-
-            return p;
-        }
-
-        public async Task<ActionResult<Hotel>> PostHotel(Hotel hotel)
-        {
-            dbContext.Hoteis.Add(hotel);
-
-            await dbContext.SaveChangesAsync();
-
-            var p = await GetHotel(hotel.Id);
-
-            return p;
-        }
-
+      
         public async Task<ActionResult<string>> DeleteHotel(int id)
         {
-            var hotel = await dbContext.Hoteis.Include(p => p.Quartos).Where(j => j.Id == id).FirstOrDefaultAsync();
+            var hotel = await _context.Hotels.FirstOrDefaultAsync(i => i.Id == id);           
 
             if (hotel != null)
-            {
-                dbContext.Hoteis.Remove(hotel);
+            _context.Hotels.Remove(hotel);
 
-                await dbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-                return "Removido com sucesso!";
-            }
-            return "Falha ao remover";
+            return "OK";
         }
     }
 }
-

@@ -18,9 +18,9 @@ namespace Hotel_Passagem.Models
         }
 
         public virtual DbSet<Cliente> Clientes { get; set; }
-        public virtual DbSet<Companhia> Companhias { get; set; }
-        public virtual DbSet<Hotel> Hoteis { get; set; }
-        public virtual DbSet<Passagem> Passagens { get; set; }
+        public virtual DbSet<Companhia> Companhia { get; set; }
+        public virtual DbSet<Hotel> Hotels { get; set; }
+        public virtual DbSet<Passagem> Passagems { get; set; }
         public virtual DbSet<Quarto> Quartos { get; set; }
         public virtual DbSet<ReservaQuarto> ReservaQuartos { get; set; }
         public virtual DbSet<VendaPassagem> VendaPassagems { get; set; }
@@ -29,7 +29,7 @@ namespace Hotel_Passagem.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=DESKTOP-8CO6RMG\\SQLEXPRESS2019;Initial Catalog=banco_hoteis;Integrated Security=True");
+                optionsBuilder.UseSqlServer("Server=RODRIGO-PC\\SQLEXPRESS;Database=test;Trusted_Connection=True;");
             }
         }
 
@@ -58,17 +58,10 @@ namespace Hotel_Passagem.Models
             {
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.IdPassagem).HasColumnName("id_passagem");
-
                 entity.Property(e => e.Nome)
                     .HasMaxLength(200)
                     .IsUnicode(false)
                     .HasColumnName("nome");
-
-                entity.HasOne(d => d.IdPassagemNavigation)
-                    .WithMany(p => p.Companhia)
-                    .HasForeignKey(d => d.IdPassagem)
-                    .HasConstraintName("FK_Companhia_Passagem");
             });
 
             modelBuilder.Entity<Hotel>(entity =>
@@ -86,11 +79,6 @@ namespace Hotel_Passagem.Models
                     .HasMaxLength(10)
                     .IsUnicode(false)
                     .HasColumnName("check_out");
-
-                entity.Property(e => e.Descricao)
-                    .HasMaxLength(500)
-                    .IsUnicode(false)
-                    .HasColumnName("descricao");
 
                 entity.Property(e => e.Estacionamento).HasColumnName("estacionamento");
 
@@ -121,6 +109,8 @@ namespace Hotel_Passagem.Models
                     .IsUnicode(false)
                     .HasColumnName("embarque");
 
+                entity.Property(e => e.IdCompanhia).HasColumnName("id_companhia");
+
                 entity.Property(e => e.Valor)
                     .HasColumnType("decimal(4, 2)")
                     .HasColumnName("valor");
@@ -144,12 +134,9 @@ namespace Hotel_Passagem.Models
                     .IsUnicode(false)
                     .HasColumnName("tipo");
 
-                entity.Property(e => e.Valor).HasColumnName("valor");
-
-                entity.HasOne(d => d.IdHotelNavigation)
-                    .WithMany(p => p.Quartos)
-                    .HasForeignKey(d => d.IdHotel)
-                    .HasConstraintName("FK_Hotel_Quarto");
+                entity.Property(e => e.Valor)
+                    .HasColumnType("decimal(4, 2)")
+                    .HasColumnName("valor");
             });
 
             modelBuilder.Entity<ReservaQuarto>(entity =>
@@ -159,30 +146,18 @@ namespace Hotel_Passagem.Models
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.DataEntrada)
-                    .HasColumnType("date")
+                    .HasMaxLength(11)
+                    .IsUnicode(false)
                     .HasColumnName("data_entrada");
 
                 entity.Property(e => e.DataSaida)
-                    .HasColumnType("date")
+                    .HasMaxLength(11)
+                    .IsUnicode(false)
                     .HasColumnName("data_saida");
 
                 entity.Property(e => e.IdCliente).HasColumnName("id_cliente");
 
                 entity.Property(e => e.IdQuarto).HasColumnName("id_quarto");
-
-                entity.Property(e => e.Valor)
-                    .HasColumnType("decimal(4, 2)")
-                    .HasColumnName("valor");
-
-                entity.HasOne(d => d.IdClienteNavigation)
-                    .WithMany(p => p.ReservaQuartos)
-                    .HasForeignKey(d => d.IdCliente)
-                    .HasConstraintName("FK_ReservaQuarto_Cliente");
-
-                entity.HasOne(d => d.IdQuartoNavigation)
-                    .WithMany(p => p.ReservaQuartos)
-                    .HasForeignKey(d => d.IdQuarto)
-                    .HasConstraintName("FK_ReservaQuarto_Quarto");
             });
 
             modelBuilder.Entity<VendaPassagem>(entity =>
@@ -194,25 +169,6 @@ namespace Hotel_Passagem.Models
                 entity.Property(e => e.IdCliente).HasColumnName("id_cliente");
 
                 entity.Property(e => e.IdPassagem).HasColumnName("id_passagem");
-
-                entity.Property(e => e.Nome)
-                    .HasMaxLength(150)
-                    .IsUnicode(false)
-                    .HasColumnName("nome");
-
-                entity.Property(e => e.Valor)
-                    .HasColumnType("decimal(4, 2)")
-                    .HasColumnName("valor");
-
-                entity.HasOne(d => d.IdClienteNavigation)
-                    .WithMany(p => p.VendaPassagems)
-                    .HasForeignKey(d => d.IdCliente)
-                    .HasConstraintName("FK_VendaPassagem_Cliente");
-
-                entity.HasOne(d => d.IdPassagemNavigation)
-                    .WithMany(p => p.VendaPassagems)
-                    .HasForeignKey(d => d.IdPassagem)
-                    .HasConstraintName("FK_VendaPassagem_Passagem");
             });
 
             OnModelCreatingPartial(modelBuilder);
