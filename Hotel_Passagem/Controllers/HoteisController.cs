@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Passagem.Models;
 using Hotel_Passagem.Services;
+using Hotel_Passagem.Validations;
 
 namespace Hotel_Passagem.Controllers
 {
@@ -15,11 +16,9 @@ namespace Hotel_Passagem.Controllers
     public class HoteisController : ControllerBase
     {
         private readonly HotelService hotelService;
-        private readonly QuartoService quartoService;
 
-        public HoteisController(HotelService hotelService, QuartoService quartoService)
+        public HoteisController(HotelService hotelService)
         {
-            this.quartoService = quartoService;
             this.hotelService = hotelService;
         }
 
@@ -36,19 +35,26 @@ namespace Hotel_Passagem.Controllers
         {
             return await hotelService.GetOneHotel(id);
         }
-
+        
         // PUT: api/Hoteis/5
         [HttpPut("{id}")]
         public async Task<ActionResult<Hotel>> PutHotel(int id, Hotel hotel)
         {
+            var validado = new HotelValidations().Validate(hotel);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
+
             return await hotelService.PutHotel(id, hotel);
         }
 
         // POST: api/Hoteis
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Hotel>> PostHotel(Hotel hotel)
         {
+            var validado = new HotelValidations().Validate(hotel);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
+
             return await hotelService.PostHotel(hotel);
         }
 
@@ -57,6 +63,6 @@ namespace Hotel_Passagem.Controllers
         public async Task<ActionResult<String>> DeleteHotel(int id)
         {
             return await hotelService.DeleteHotel(id);
-        }
+        } 
     }
 }

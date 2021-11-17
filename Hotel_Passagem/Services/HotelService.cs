@@ -15,13 +15,13 @@ namespace Hotel_Passagem.Services
             _context = context;
         }
 
-        public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels()
+        public async Task<ActionResult<IEnumerable<Hotel>>> GetAllHoteis()
         {
             return await _context.Hotels.ToListAsync();
         }
 
        
-        public async Task<ActionResult<Hotel>> GetHotel(int id)
+        public async Task<ActionResult<Hotel>> GetOneHotel(int id)
         {
             var hotel = await _context.Hotels.FindAsync(id);
             return hotel;

@@ -28,9 +28,11 @@ namespace Hotel_Passagem.Services
 
         public async Task<ActionResult<Quarto>> PutQuarto(int id, Quarto quarto)
         {
-            _context.Entry(quarto).State = EntityState.Modified;         
+            _context.Entry(quarto).State = EntityState.Modified;   
+            
             await _context.SaveChangesAsync();
             var aux = await _context.Quartos.FirstOrDefaultAsync(i => i.Id == id);
+
             return aux;
         }
 

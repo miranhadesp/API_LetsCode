@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Hotel_Passagem.Models;
+using Hotel_Passagem.Services;
 
 namespace Hotel_Passagem
 {
@@ -38,6 +39,8 @@ namespace Hotel_Passagem
             //services.AddScoped<testContext>();
 
             services.AddScoped<AppDbContext>();
+            services.AddScoped<HotelService>();
+            services.AddScoped<QuartoService>();
 
             services.AddMvc()
             .AddNewtonsoftJson(
