@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Passagem.Models;
+using Hotel_Passagem.Services;
+using Hotel_Passagem.Validations;
 
 namespace Hotel_Passagem.Controllers
 {
@@ -13,9 +15,9 @@ namespace Hotel_Passagem.Controllers
     [ApiController]
     public class ReservaQuartosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ReservaQuartoService _context;
 
-        public ReservaQuartosController(AppDbContext context)
+        public ReservaQuartosController(ReservaQuartoService context)
         {
             _context = context;
         }
@@ -24,52 +26,26 @@ namespace Hotel_Passagem.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReservaQuarto>>> GetReservaQuartos()
         {
-            return await _context.ReservaQuartos.ToListAsync();
+            return await _context.GetReservaQuartos();
         }
 
         // GET: api/ReservaQuartos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ReservaQuarto>> GetReservaQuarto(int id)
         {
-            var reservaQuarto = await _context.ReservaQuartos.FindAsync(id);
-
-            if (reservaQuarto == null)
-            {
-                return NotFound();
-            }
-
-            return reservaQuarto;
+            return await _context.GetReservaQuarto(id);
         }
 
         // PUT: api/ReservaQuartos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservaQuarto(int id, ReservaQuarto reservaQuarto)
+        public async Task<ActionResult<ReservaQuarto>> PutReservaQuarto(int id, ReservaQuarto reservaQuarto)
         {
-            if (id != reservaQuarto.Id)
-            {
-                return BadRequest();
-            }
+            var validado = new ReservaQuartoValidations().Validate(reservaQuarto);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            _context.Entry(reservaQuarto).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ReservaQuartoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return await _context.PutReservaQuarto(id, reservaQuarto);
         }
 
         // POST: api/ReservaQuartos
@@ -77,31 +53,18 @@ namespace Hotel_Passagem.Controllers
         [HttpPost]
         public async Task<ActionResult<ReservaQuarto>> PostReservaQuarto(ReservaQuarto reservaQuarto)
         {
-            _context.ReservaQuartos.Add(reservaQuarto);
-            await _context.SaveChangesAsync();
+            var validado = new ReservaQuartoValidations().Validate(reservaQuarto);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            return CreatedAtAction("GetReservaQuarto", new { id = reservaQuarto.Id }, reservaQuarto);
+            return await _context.PostReservaQuarto(reservaQuarto);
         }
 
         // DELETE: api/ReservaQuartos/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReservaQuarto(int id)
+        public async Task<ActionResult<string>> DeleteReservaQuarto(int id)
         {
-            var reservaQuarto = await _context.ReservaQuartos.FindAsync(id);
-            if (reservaQuarto == null)
-            {
-                return NotFound();
-            }
-
-            _context.ReservaQuartos.Remove(reservaQuarto);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ReservaQuartoExists(int id)
-        {
-            return _context.ReservaQuartos.Any(e => e.Id == id);
+            return await _context.DeleteReservaQuarto(id);
         }
     }
 }

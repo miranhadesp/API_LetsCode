@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Passagem.Models;
+using Hotel_Passagem.Services;
+using Hotel_Passagem.Validations;
 
 namespace Hotel_Passagem.Controllers
 {
@@ -13,63 +15,37 @@ namespace Hotel_Passagem.Controllers
     [ApiController]
     public class ClientesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ClienteService clienteService;
 
-        public ClientesController(AppDbContext context)
+        public ClientesController(ClienteService clienteService)
         {
-            _context = context;
+            this.clienteService = clienteService;
         }
 
         // GET: api/Clientes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
         {
-            return await _context.Clientes.ToListAsync();
+            return await clienteService.GetClientes();
         }
 
         // GET: api/Clientes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Cliente>> GetCliente(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
-
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            return cliente;
+            return await clienteService.GetCliente(id);
         }
 
         // PUT: api/Clientes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(int id, Cliente cliente)
+        public async Task<ActionResult<Cliente>> PutCliente(int id, Cliente cliente)
         {
-            if (id != cliente.Id)
-            {
-                return BadRequest();
-            }
+            var validado = new ClienteValidations().Validate(cliente);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            _context.Entry(cliente).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClienteExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return await clienteService.PutCliente(id, cliente);
         }
 
         // POST: api/Clientes
@@ -77,31 +53,18 @@ namespace Hotel_Passagem.Controllers
         [HttpPost]
         public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
         {
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
+            var validado = new ClienteValidations().Validate(cliente);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            return CreatedAtAction("GetCliente", new { id = cliente.Id }, cliente);
+            return await clienteService.PostCliente(cliente);
         }
 
         // DELETE: api/Clientes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCliente(int id)
+        public async Task<ActionResult<string>> DeleteCliente(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ClienteExists(int id)
-        {
-            return _context.Clientes.Any(e => e.Id == id);
+            return await clienteService.DeleteCliente(id);
         }
     }
 }

@@ -41,6 +41,11 @@ namespace Hotel_Passagem
             services.AddScoped<AppDbContext>();
             services.AddScoped<HotelService>();
             services.AddScoped<QuartoService>();
+            services.AddScoped<ClienteService>();
+            services.AddScoped<CompanhiaService>();
+            services.AddScoped<PassagemService>();
+            services.AddScoped<ReservaQuartoService>();
+            services.AddScoped<VendaPassagemService>();
 
             services.AddMvc()
             .AddNewtonsoftJson(

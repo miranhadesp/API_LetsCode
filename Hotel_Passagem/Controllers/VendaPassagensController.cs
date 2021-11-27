@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Passagem.Models;
+using Hotel_Passagem.Services;
+using Hotel_Passagem.Validations;
 
 namespace Hotel_Passagem.Controllers
 {
@@ -13,9 +15,9 @@ namespace Hotel_Passagem.Controllers
     [ApiController]
     public class VendaPassagensController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly VendaPassagemService _context;
 
-        public VendaPassagensController(AppDbContext context)
+        public VendaPassagensController(VendaPassagemService context)
         {
             _context = context;
         }
@@ -24,52 +26,26 @@ namespace Hotel_Passagem.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VendaPassagem>>> GetVendaPassagems()
         {
-            return await _context.VendaPassagems.ToListAsync();
+            return await _context.GetVendaPassagems();
         }
 
         // GET: api/VendaPassagens/5
         [HttpGet("{id}")]
         public async Task<ActionResult<VendaPassagem>> GetVendaPassagem(int id)
         {
-            var vendaPassagem = await _context.VendaPassagems.FindAsync(id);
-
-            if (vendaPassagem == null)
-            {
-                return NotFound();
-            }
-
-            return vendaPassagem;
+            return await _context.GetVendaPassagem(id);
         }
 
         // PUT: api/VendaPassagens/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVendaPassagem(int id, VendaPassagem vendaPassagem)
+        public async Task<ActionResult<VendaPassagem>> PutVendaPassagem(int id, VendaPassagem vendaPassagem)
         {
-            if (id != vendaPassagem.Id)
-            {
-                return BadRequest();
-            }
+            var validado = new VendaPassagemValidations().Validate(vendaPassagem);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            _context.Entry(vendaPassagem).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!VendaPassagemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return await _context.PutVendaPassagem(id, vendaPassagem);
         }
 
         // POST: api/VendaPassagens
@@ -77,31 +53,19 @@ namespace Hotel_Passagem.Controllers
         [HttpPost]
         public async Task<ActionResult<VendaPassagem>> PostVendaPassagem(VendaPassagem vendaPassagem)
         {
-            _context.VendaPassagems.Add(vendaPassagem);
-            await _context.SaveChangesAsync();
+            var validado = new VendaPassagemValidations().Validate(vendaPassagem);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            return CreatedAtAction("GetVendaPassagem", new { id = vendaPassagem.Id }, vendaPassagem);
+            return await _context.PostVendaPassagem(vendaPassagem);
         }
 
         // DELETE: api/VendaPassagens/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVendaPassagem(int id)
+        public async Task<ActionResult<string>> DeleteVendaPassagem(int id)
         {
-            var vendaPassagem = await _context.VendaPassagems.FindAsync(id);
-            if (vendaPassagem == null)
-            {
-                return NotFound();
-            }
-
-            _context.VendaPassagems.Remove(vendaPassagem);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool VendaPassagemExists(int id)
-        {
-            return _context.VendaPassagems.Any(e => e.Id == id);
+            return await _context.DeleteVendaPassagem(id);
         }
     }
+    
 }

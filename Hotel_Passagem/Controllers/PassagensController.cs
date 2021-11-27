@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Passagem.Models;
+using Hotel_Passagem.Services;
+using Hotel_Passagem.Validations;
 
 namespace Hotel_Passagem.Controllers
 {
@@ -13,9 +15,9 @@ namespace Hotel_Passagem.Controllers
     [ApiController]
     public class PassagensController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly PassagemService _context;
 
-        public PassagensController(AppDbContext context)
+        public PassagensController(PassagemService context)
         {
             _context = context;
         }
@@ -24,52 +26,26 @@ namespace Hotel_Passagem.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Passagem>>> GetPassagems()
         {
-            return await _context.Passagems.ToListAsync();
+            return await _context.GetPassagems();
         }
 
         // GET: api/Passagens/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Passagem>> GetPassagem(int id)
         {
-            var passagem = await _context.Passagems.FindAsync(id);
-
-            if (passagem == null)
-            {
-                return NotFound();
-            }
-
-            return passagem;
+            return await _context.GetPassagem(id);
         }
 
         // PUT: api/Passagens/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPassagem(int id, Passagem passagem)
+        public async Task<ActionResult<Passagem>> PutPassagem(int id, Passagem passagem)
         {
-            if (id != passagem.Id)
-            {
-                return BadRequest();
-            }
+            var validado = new PassagemValidations().Validate(passagem);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            _context.Entry(passagem).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PassagemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return await _context.PutPassagem(id, passagem);
         }
 
         // POST: api/Passagens
@@ -77,31 +53,18 @@ namespace Hotel_Passagem.Controllers
         [HttpPost]
         public async Task<ActionResult<Passagem>> PostPassagem(Passagem passagem)
         {
-            _context.Passagems.Add(passagem);
-            await _context.SaveChangesAsync();
+            var validado = new PassagemValidations().Validate(passagem);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            return CreatedAtAction("GetPassagem", new { id = passagem.Id }, passagem);
+            return await _context.PostPassagem(passagem);
         }
 
         // DELETE: api/Passagens/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePassagem(int id)
+        public async Task<ActionResult<string>> DeletePassagem(int id)
         {
-            var passagem = await _context.Passagems.FindAsync(id);
-            if (passagem == null)
-            {
-                return NotFound();
-            }
-
-            _context.Passagems.Remove(passagem);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool PassagemExists(int id)
-        {
-            return _context.Passagems.Any(e => e.Id == id);
+            return await _context.DeletePassagem(id);
         }
     }
 }

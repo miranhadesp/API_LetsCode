@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hotel_Passagem.Models;
+using Hotel_Passagem.Services;
+using Hotel_Passagem.Validations;
 
 namespace Hotel_Passagem.Controllers
 {
@@ -13,63 +15,37 @@ namespace Hotel_Passagem.Controllers
     [ApiController]
     public class CompanhiasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly CompanhiaService _context;
 
-        public CompanhiasController(AppDbContext context)
+        public CompanhiasController(CompanhiaService context)
         {
             _context = context;
         }
 
         // GET: api/Companhias
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Companhia>>> GetCompanhia()
+        public async Task<ActionResult<IEnumerable<Companhia>>> GetCompanhias()
         {
-            return await _context.Companhia.ToListAsync();
+            return await _context.GetCompanhias();
         }
 
         // GET: api/Companhias/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Companhia>> GetCompanhia(int id)
         {
-            var companhia = await _context.Companhia.FindAsync(id);
-
-            if (companhia == null)
-            {
-                return NotFound();
-            }
-
-            return companhia;
+            return await _context.GetCompanhia(id);
         }
 
         // PUT: api/Companhias/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCompanhia(int id, Companhia companhia)
+        public async Task<ActionResult<Companhia>> PutCompanhia(int id, Companhia companhia)
         {
-            if (id != companhia.Id)
-            {
-                return BadRequest();
-            }
+            var validado = new CompanhiaValidations().Validate(companhia);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            _context.Entry(companhia).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CompanhiaExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return await _context.PutCompanhia(id, companhia);
         }
 
         // POST: api/Companhias
@@ -77,31 +53,18 @@ namespace Hotel_Passagem.Controllers
         [HttpPost]
         public async Task<ActionResult<Companhia>> PostCompanhia(Companhia companhia)
         {
-            _context.Companhia.Add(companhia);
-            await _context.SaveChangesAsync();
+            var validado = new CompanhiaValidations().Validate(companhia);
+            if (!validado.IsValid)
+                return BadRequest(validado.Erros);
 
-            return CreatedAtAction("GetCompanhia", new { id = companhia.Id }, companhia);
+            return await _context.PostCompanhia(companhia);
         }
 
         // DELETE: api/Companhias/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCompanhia(int id)
+        public async Task<ActionResult<string>> DeleteCompanhia(int id)
         {
-            var companhia = await _context.Companhia.FindAsync(id);
-            if (companhia == null)
-            {
-                return NotFound();
-            }
-
-            _context.Companhia.Remove(companhia);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CompanhiaExists(int id)
-        {
-            return _context.Companhia.Any(e => e.Id == id);
+            return await _context.DeleteCompanhia(id);
         }
     }
 }
